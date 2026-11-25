@@ -3,15 +3,16 @@ import {
   ImageDown,
   QrCode,
   FolderTree,
+  FileStack,
   Sun,
   Moon,
-  Layers,
 } from 'lucide-react';
 import { ImageCompressorTool } from './components/ImageCompressorTool';
 import { QrCodeGeneratorTool } from './components/QrCodeGeneratorTool';
 import { DirectoryTreeTool } from './components/DirectoryTreeTool';
+import { PdfToolsPanel } from './components/PdfToolsPanel';
 
-type ActiveTab = 'image' | 'qr' | 'tree';
+type ActiveTab = 'image' | 'qr' | 'tree' | 'pdf';
 
 const TOOL_TABS: Array<{
   id: ActiveTab;
@@ -36,6 +37,12 @@ const TOOL_TABS: Array<{
     label: 'Sơ đồ thư mục Tree',
     shortLabel: 'Sơ đồ Tree',
     icon: FolderTree,
+  },
+  {
+    id: 'pdf',
+    label: '4. Tách & Ghép PDF',
+    shortLabel: 'Tách & Ghép PDF',
+    icon: FileStack,
   },
 ];
 
@@ -77,16 +84,19 @@ export default function App() {
             }}
             className="inline-flex items-center gap-2.5 text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4169E1] rounded-md"
           >
-            <span className="w-8 h-8 rounded-lg bg-[#4169E1] text-white inline-flex items-center justify-center shrink-0">
-              <Layers className="w-4 h-4" />
-            </span>
+            <img
+              src="/assets/aistudio/icon-ndh-tools_3a84772d.webp"
+              alt="NDH Tools"
+              referrerPolicy="no-referrer"
+              className="w-8 h-8 object-contain shrink-0"
+            />
             <span>NDH Tools</span>
           </a>
 
-          {/* Zone 2: Desktop 3-Tool Navigation Tabs */}
+          {/* Zone 2: Desktop 4-Tool Navigation Tabs */}
           <nav
             aria-label="Danh mục công cụ"
-            className="hidden md:flex items-center gap-1"
+            className="hidden lg:flex items-center gap-1"
           >
             {TOOL_TABS.map((tab) => {
               const Icon = tab.icon;
@@ -97,7 +107,7 @@ export default function App() {
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   aria-current={active ? 'page' : undefined}
-                  className={`relative h-10 px-3.5 inline-flex items-center gap-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4169E1] ${
+                  className={`relative h-10 px-3 inline-flex items-center gap-1.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4169E1] ${
                     active
                       ? 'text-[#4169E1] dark:text-blue-400 bg-[#4169E1]/8 dark:bg-[#4169E1]/15'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/80 dark:hover:bg-slate-800/60'
@@ -126,11 +136,11 @@ export default function App() {
         </div>
       </header>
 
-      {/* Mobile Tool Switcher (scrolls naturally, keeps sticky header well under 15% mobile height) */}
-      <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-2">
+      {/* Mobile & Tablet Tool Switcher (scrolls naturally, keeps sticky header well under 15% mobile height) */}
+      <div className="lg:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-2">
         <nav
           aria-label="Chọn công cụ trên di động"
-          className="grid grid-cols-3 gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-950"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-950"
         >
           {TOOL_TABS.map((tab) => {
             const Icon = tab.icon;
@@ -165,6 +175,9 @@ export default function App() {
         </div>
         <div className={activeTab === 'tree' ? 'block' : 'hidden'}>
           <DirectoryTreeTool />
+        </div>
+        <div className={activeTab === 'pdf' ? 'block' : 'hidden'}>
+          <PdfToolsPanel />
         </div>
       </main>
 
