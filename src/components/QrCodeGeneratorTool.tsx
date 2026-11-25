@@ -19,6 +19,8 @@ import {
   Info,
   Palette,
   Sliders,
+  Copy,
+  Check,
 } from 'lucide-react';
 import {
   QrContentType,
@@ -71,7 +73,7 @@ export const QrCodeGeneratorTool: React.FC = () => {
   const [contentType, setContentType] = useState<QrContentType>('text');
 
   // Payload states
-  const [textValue, setTextValue] = useState<string>('https://ndhtools.vn');
+  const [textValue, setTextValue] = useState<string>('https://ndh.io.vn');
   const [wifi, setWifi] = useState<WifiPayload>({
     ssid: '',
     password: '',
@@ -103,6 +105,8 @@ export const QrCodeGeneratorTool: React.FC = () => {
   const [logoError, setLogoError] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState<'png' | 'svg' | null>(null);
+  const [isCopying, setIsCopying] = useState<boolean>(false);
+  const [copiedImage, setCopiedImage] = useState<boolean>(false);
 
   const qrContainerRef = useRef<HTMLDivElement | null>(null);
   const qrInstanceRef = useRef<QRCodeStyling | null>(null);
@@ -263,6 +267,63 @@ export const QrCodeGeneratorTool: React.FC = () => {
     }
   };
 
+  const handleCopyImage = async () => {
+    if (!rawPayload || isExporting || isCopying) return;
+    setExportError(null);
+
+    if (
+      typeof navigator === 'undefined' ||
+      !navigator.clipboard ||
+      typeof navigator.clipboard.write !== 'function' ||
+      typeof ClipboardItem === 'undefined'
+    ) {
+      setExportError(
+        'Trình duyệt hiện tại không hỗ trợ sao chép ảnh trực tiếp vào clipboard. Vui lòng dùng nút Tải PNG.'
+      );
+      return;
+    }
+
+    setIsCopying(true);
+
+    const buildPngBlob = async (): Promise<Blob> => {
+      const exportQr = new QRCodeStyling({
+        ...buildQrOptions(exportSize),
+        type: 'canvas',
+      });
+      const rawData = await exportQr.getRawData('png');
+      if (!rawData) {
+        throw new Error('Không thể tạo ảnh PNG để sao chép.');
+      }
+      if (rawData instanceof Blob) {
+        return rawData.type === 'image/png'
+          ? rawData
+          : new Blob([await rawData.arrayBuffer()], { type: 'image/png' });
+      }
+      return new Blob([new Uint8Array(rawData)], { type: 'image/png' });
+    };
+
+    try {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': buildPngBlob() }),
+        ]);
+      } catch {
+        const resolvedBlob = await buildPngBlob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': resolvedBlob }),
+        ]);
+      }
+      setCopiedImage(true);
+      setTimeout(() => setCopiedImage(false), 2000);
+    } catch {
+      setExportError(
+        'Không thể sao chép ảnh QR vào clipboard (có thể do trình duyệt chặn quyền truy cập clipboard). Vui lòng dùng nút Tải PNG.'
+      );
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Title */}
@@ -327,7 +388,7 @@ export const QrCodeGeneratorTool: React.FC = () => {
                   rows={4}
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
-                  placeholder="Ví dụ: https://ndhtools.vn hoặc lời nhắn tiếng Việt có dấu..."
+                  placeholder="Ví dụ: https://ndh.io.vn hoặc lời nhắn tiếng Việt có dấu..."
                   className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4169E1]/40 focus:border-[#4169E1] resize-y"
                 />
                 <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 tabular-nums">
@@ -444,7 +505,7 @@ export const QrCodeGeneratorTool: React.FC = () => {
                     type="text"
                     value={vcard.fullName}
                     onChange={(e) => setVcard((prev) => ({ ...prev, fullName: e.target.value }))}
-                    placeholder="Nguyễn Đức Hùng"
+                    placeholder="Hoàng Lam"
                     className="w-full h-10 px-3.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4169E1]/40 focus:border-[#4169E1]"
                   />
                 </div>
@@ -478,7 +539,7 @@ export const QrCodeGeneratorTool: React.FC = () => {
                     type="email"
                     value={vcard.email}
                     onChange={(e) => setVcard((prev) => ({ ...prev, email: e.target.value }))}
-                    placeholder="lienhe@ndhtools.vn"
+                    placeholder="lienhe@ndh.io.vn"
                     className="w-full h-10 px-3.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4169E1]/40 focus:border-[#4169E1]"
                   />
                 </div>
@@ -495,7 +556,7 @@ export const QrCodeGeneratorTool: React.FC = () => {
                     type="url"
                     value={vcard.website}
                     onChange={(e) => setVcard((prev) => ({ ...prev, website: e.target.value }))}
-                    placeholder="https://ndhtools.vn"
+                    placeholder="https://ndh.io.vn"
                     className="w-full h-10 px-3.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4169E1]/40 focus:border-[#4169E1]"
                   />
                 </div>
@@ -514,7 +575,7 @@ export const QrCodeGeneratorTool: React.FC = () => {
                     onChange={(e) =>
                       setVcard((prev) => ({ ...prev, organization: e.target.value }))
                     }
-                    placeholder="Công ty Công nghệ NDH"
+                    placeholder="Trường Đại học A"
                     className="w-full h-10 px-3.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#4169E1]/40 focus:border-[#4169E1]"
                   />
                 </div>
@@ -893,25 +954,47 @@ export const QrCodeGeneratorTool: React.FC = () => {
             </div>
           )}
 
-          {/* Export Buttons */}
-          <div className="w-full grid grid-cols-2 gap-3 pt-1">
+          {/* Export & Copy Buttons */}
+          <div className="w-full space-y-2.5 pt-1">
+            <div className="w-full grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                disabled={!rawPayload || isExporting !== null || isCopying}
+                onClick={() => void handleExport('png')}
+                className="h-11 px-4 inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg bg-[#4169E1] hover:bg-[#3358CC] text-white transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                <Download className="w-4 h-4" />
+                <span>{isExporting === 'png' ? 'Đang xuất...' : 'Tải PNG'}</span>
+              </button>
+              <button
+                type="button"
+                disabled={!rawPayload || isExporting !== null || isCopying}
+                onClick={() => void handleExport('svg')}
+                className="h-11 px-4 inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 hover:border-[#4169E1] hover:text-[#4169E1] dark:hover:text-blue-400 transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                <Download className="w-4 h-4" />
+                <span>{isExporting === 'svg' ? 'Đang xuất...' : 'Tải SVG'}</span>
+              </button>
+            </div>
+
             <button
               type="button"
-              disabled={!rawPayload || isExporting !== null}
-              onClick={() => void handleExport('png')}
-              className="h-11 px-4 inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg bg-[#4169E1] hover:bg-[#3358CC] text-white transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap"
+              disabled={!rawPayload || isExporting !== null || isCopying}
+              onClick={() => void handleCopyImage()}
+              className={`w-full h-10 px-4 inline-flex items-center justify-center gap-2 text-sm font-medium rounded-lg border transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap ${
+                copiedImage
+                  ? 'border-emerald-600 bg-emerald-600 text-white'
+                  : 'border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 hover:border-[#4169E1] hover:text-[#4169E1] dark:hover:text-blue-400'
+              }`}
             >
-              <Download className="w-4 h-4" />
-              <span>{isExporting === 'png' ? 'Đang xuất...' : 'Tải PNG'}</span>
-            </button>
-            <button
-              type="button"
-              disabled={!rawPayload || isExporting !== null}
-              onClick={() => void handleExport('svg')}
-              className="h-11 px-4 inline-flex items-center justify-center gap-2 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 hover:border-[#4169E1] hover:text-[#4169E1] dark:hover:text-blue-400 transition-colors cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              <Download className="w-4 h-4" />
-              <span>{isExporting === 'svg' ? 'Đang xuất...' : 'Tải SVG'}</span>
+              {copiedImage ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>
+                {isCopying
+                  ? 'Đang sao chép ảnh...'
+                  : copiedImage
+                    ? 'Đã sao chép ảnh QR ✓'
+                    : 'Sao chép QR'}
+              </span>
             </button>
           </div>
         </aside>

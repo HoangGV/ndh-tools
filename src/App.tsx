@@ -184,8 +184,8 @@ export default function App() {
       {/* Quiet Minimal Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <span>NDH Tools — Bộ công cụ tiện ích trực tuyến</span>
-          <span>Xử lý 100% cục bộ trên trình duyệt · Bảo mật tuyệt đối dữ liệu của bạn</span>
+          <span>NDH Tools | Công cụ trực tuyến</span>
+          <span>Xử lý 100% trên trình duyệt · Bảo mật tuyệt đối dữ liệu của bạn</span>
         </div>
       </footer>
     </div>
