@@ -1,0 +1,6 @@
+{
+  "name": "NDH Tools",
+  "description": "Bộ công cụ đa tiện ích trực tuyến xử lý 100% trên trình duyệt: nén & chuyển đổi định dạng ảnh hàng loạt, tạo mã QR tùy chỉnh, và tạo sơ đồ thư mục hỗ trợ tiếng Việt chuẩn.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
