@@ -27,25 +27,7 @@ export const SAMPLE_VIETNAMESE_TREE = `du-an-thuong-mai-dien-tu/
     hình-ảnh/
       logo-chính.svg
       ảnh-bìa-trang-chủ.webp
-    favicon.ico
-  src/
-    components/
-      ThanhĐiềuHướng.tsx
-      GiỏHàngNhanh.tsx
-      ThẻSảnPhẩm.tsx
-    pages/
-      TrangChủ.tsx
-      ChiTiếtSảnPhẩm.tsx
-      ThanhToán.tsx
-    utils/
-      định-dạng-tiền-tệ.ts
-      xử-lý-ảnh.ts
-    App.tsx
-    index.css
-    main.tsx
-  .env.example
-  package.json
-  README.md`;
+    favicon.ico`;
 
 /**
  * Computes visual indentation width of a line while preserving full UTF-8/Vietnamese content.
